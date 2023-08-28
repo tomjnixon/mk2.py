@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import serial_asyncio
 from mk2 import RAMVar, VEBusConnection, VEBusSession
 
@@ -10,6 +11,8 @@ def parse_args():
 
     parser.add_argument("--tty", "-t", required=True)
 
+    parser.add_argument("--log-level", "-l", default="WARNING")
+
     return parser.parse_args()
 
 
@@ -19,6 +22,8 @@ def fmt_var(var, value):
 
 
 async def main(args):
+    logging.basicConfig(level=args.log_level)
+
     reader, writer = await serial_asyncio.open_serial_connection(
         url=args.tty, baudrate=2400
     )
@@ -38,7 +43,7 @@ async def main(args):
             values = await session.read_ram_vars(ram_vars)
 
             line = " ".join(fmt_var(var, value) for var, value in zip(ram_vars, values))
-            print(line)
+            print(line)  # noqa
 
             await asyncio.sleep(5)
 

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import replace
 from typing import Callable
@@ -23,11 +24,20 @@ class VEBusConnection:
             # use conn here
     """
 
-    def __init__(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    def __init__(
+        self,
+        reader: asyncio.StreamReader,
+        writer: asyncio.StreamWriter,
+        logger: Optional[logging.Logger] = None,
+    ):
         self.reader = reader
         self.writer = writer
 
-        self.unpacker = Unpacker(self._on_frame)
+        self.logger = logger if logger is not None else logging.getLogger(__name__)
+
+        self.unpacker = Unpacker(
+            self._on_frame, logger=self.logger.getChild("unpacker")
+        )
         self.reply_parser = ReplyParser()
 
         self.reply_callbacks: list[Callable[[RawFrame], None]] = []
@@ -46,23 +56,26 @@ class VEBusConnection:
             self.unpacker.on_recv(buf)
 
     def _on_frame(self, frame):
+        self.logger.debug("rx frame: %r", frame)
+
         try:
             reply = self.reply_parser.parse_frame(frame)
         except Exception as e:
             raise RuntimeError(f"error while parsing frame {frame!r}") from e
         if reply is not None:
-            print("reply", reply)
+            self.logger.info("reply: %r", reply)
             for cb in self.reply_callbacks:
                 cb(reply)
         else:
-            print("unhandled frame", frame)
+            self.logger.warning("unparsed frame: %r", frame)
 
     async def send_frame(self, frame: RawFrame):
-        print("send frame", frame)
+        self.logger.debug("tx frame: %r", frame)
         self.writer.write(format_frame(frame))
         await self.writer.drain()
 
     async def send_command(self, command: Command):
+        self.logger.info("command: %r", command)
         await self.send_frame(command.as_frame())
 
     @contextmanager

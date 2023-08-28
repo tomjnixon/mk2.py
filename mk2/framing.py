@@ -49,10 +49,17 @@ class Unpacker:
     the constructor
     """
 
-    def __init__(self, on_frame, frame_types=(0xFF, 0x20, 0x21, 0x41, 0x3C)):
+    def __init__(
+        self,
+        on_frame,
+        frame_types=(0xFF, 0x20, 0x21, 0x41, 0x3C),
+        logger: Optional[logging.Logger] = None,
+    ):
         self.buffer = bytearray()
         self.on_frame = on_frame
         self.frame_types = frame_types
+
+        self.logger = logger if logger is not None else logging.getLogger(__name__)
 
     def on_recv(self, recvd: bytes):
         self.buffer.extend(recvd)
@@ -107,7 +114,7 @@ class Unpacker:
                 pos = i
                 break
 
-        print("drop", self.buffer[: pos - 1])
+        self.logger.warning("dropped bytes: %s", self.buffer[: pos - 1].hex(" "))
         self.buffer = self.buffer[pos - 1 :]
 
 
