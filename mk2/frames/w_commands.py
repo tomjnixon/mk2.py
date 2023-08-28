@@ -100,7 +100,7 @@ class GetRAMVarInfoReply(Reply):
                 if scale_float >= 0x4000:
                     scale_float = 1 / (0x8000 - scale_float)
 
-                return cls(info_type(scale=scale, offset=offset))
+                return cls(info_type(scale=scale_float, offset=offset))
 
 
 @dataclass
