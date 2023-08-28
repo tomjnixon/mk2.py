@@ -40,7 +40,7 @@ class VEBusConnection:
         )
         self.reply_parser = ReplyParser()
 
-        self.reply_callbacks: list[Callable[[RawFrame], None]] = []
+        self.reply_callbacks: list[Callable[[Reply], None]] = []
 
     @asynccontextmanager
     async def run(self):
