@@ -52,7 +52,7 @@ class StateCommand2(Command):
         base_fmt = "<BHBB"
         base_args = self.switch_state.value, limit, 0x1, flags.value
 
-        if self.flags_ext_0 is not None:
+        if self.flags_ext_0 is not None and self.eeprom_flags is not None:
             return MK2Frame(
                 b"S",
                 struct.pack(

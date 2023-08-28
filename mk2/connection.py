@@ -2,11 +2,11 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import replace
-from typing import Callable
+from typing import Callable, Optional
 from .frames.f_commands import FCommandType
-from .frames.types import Command, ReplyParser
+from .frames.types import Command, Reply, ReplyParser
 from .framing import RawFrame, Unpacker, format_frame
-from .ram_var import AnyRAMVar, RAMVar
+from .ram_var import AnyRAMVar, FloatRAMVarInfo, RAMVar
 from .setting import Setting, SettingFlags
 
 
@@ -55,7 +55,7 @@ class VEBusConnection:
                 break
             self.unpacker.on_recv(buf)
 
-    def _on_frame(self, frame):
+    def _on_frame(self, frame: RawFrame):
         self.logger.debug("rx frame: %r", frame)
 
         try:
@@ -93,11 +93,13 @@ class VEBusConnection:
 
         self.reply_callbacks.pop(i)
 
-    async def wait_for_reply(self, match_reply, timeout=0.5):
+    async def wait_for_reply(
+        self, match_reply: Callable[[Reply], bool], timeout=0.5
+    ) -> Reply:
         """wait for a reply matching match_reply, or raise TimeoutError after
         timeout seconds
         """
-        f = asyncio.Future()
+        f: asyncio.Future[Reply] = asyncio.Future()
 
         def reply_cb(reply):
             if match_reply(reply):
@@ -114,6 +116,7 @@ class VEBusConnection:
         reply = await self.wait_for_reply(
             lambda r: isinstance(r, WriteAddressReply), timeout=2
         )
+        assert isinstance(reply, WriteAddressReply)
         if reply.address != address:
             raise ValueError("WriteAddressCommand returned wrong address")
 
@@ -139,10 +142,12 @@ class VEBusConnection:
 
         await self.send_command(GetRAMVarInfoCommand(ram_var))
         reply = await self.wait_for_reply(lambda r: isinstance(r, GetRAMVarInfoReply))
+        assert isinstance(reply, GetRAMVarInfoReply)
         info = reply.info
 
         # fix up variables with extra scales
         if ram_var in (RAMVar.INVERTER_PERIOD, RAMVar.MAINS_PERIOD):
+            assert isinstance(info, FloatRAMVarInfo)
             info = replace(info, scale=info.scale / 10.0)
 
         return info
@@ -156,6 +161,7 @@ class VEBusConnection:
             ram_vars_slice = ram_vars[start : start + batch_size]
             await self.send_command(ReadRAMVarCommand(ram_vars_slice))
             reply = await self.wait_for_reply(lambda r: isinstance(r, ReadRAMVarReply))
+            assert isinstance(reply, ReadRAMVarReply)
 
             if len(reply.values) < len(ram_vars_slice):
                 raise RuntimeError("too few vars returned")
@@ -194,6 +200,7 @@ class VEBusConnection:
 
         await self.send_command(GetSettingInfoCommand(setting))
         reply = await self.wait_for_reply(lambda r: isinstance(r, GetSettingInfoReply))
+        assert isinstance(reply, GetSettingInfoReply)
         return reply.info
 
     async def read_setting_unscaled(self, setting: Setting):
@@ -201,6 +208,7 @@ class VEBusConnection:
 
         await self.send_command(ReadSettingCommand(setting))
         reply = await self.wait_for_reply(lambda r: isinstance(r, ReadSettingReply))
+        assert isinstance(reply, ReadSettingReply)
         return reply.raw_value
 
     async def write_setting_unscaled(

@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import serial_asyncio
-from mk2 import RAMVar, VEBusConnection, VEBusSession
+from mk2 import AnyRAMVar, RAMVar, VEBusConnection, VEBusSession
 
 
 def parse_args():
@@ -30,7 +30,7 @@ async def main(args):
     interface = VEBusConnection(reader, writer)
     session = VEBusSession(interface)
     async with interface.run(), session.run():
-        ram_vars = [
+        ram_vars: list[AnyRAMVar] = [
             RAMVar.INVERTER_POWER,
             RAMVar.INPUT_POWER,
             RAMVar.OUTPUT_POWER,

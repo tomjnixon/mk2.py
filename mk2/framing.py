@@ -1,6 +1,7 @@
 import logging
 import struct
 from dataclasses import dataclass
+from typing import Optional
 
 
 def calc_checksum(message_without_checksum: bytes):
@@ -127,7 +128,7 @@ def test_unpacker():
     ]
     messags_bytes = b"".join(map(format_frame, frames))
 
-    unpacked = []
+    unpacked: list[RawFrame] = []
     unpacker = Unpacker(unpacked.append)
 
     for b in messags_bytes:

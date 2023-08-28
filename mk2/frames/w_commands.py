@@ -89,20 +89,18 @@ class GetRAMVarInfoReply(Reply):
                 )
 
             if scale == 0:
-                info = None
+                return cls(None)
             elif offset & 0xFFFF == 0x8000:
                 if not (1 <= scale <= 16):
                     raise ValueError("bad scale value for bit")
-                info = BitRamVarInfo(bit=scale - 1)
+                return cls(BitRamVarInfo(bit=scale - 1))
             else:
                 info_type = SignedRAMVarInfo if scale < 0 else UnsignedRAMVarInfo
-                scale = abs(scale)
-                if scale >= 0x4000:
-                    scale = 1 / (0x8000 - scale)
+                scale_float = float(abs(scale))
+                if scale_float >= 0x4000:
+                    scale_float = 1 / (0x8000 - scale_float)
 
-                info = info_type(scale=scale, offset=offset)
-
-            return cls(info)
+                return cls(info_type(scale=scale, offset=offset))
 
 
 @dataclass
