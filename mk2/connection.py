@@ -118,7 +118,7 @@ class VEBusConnection:
             raise ValueError("WriteAddressCommand returned wrong address")
 
     async def send_reset(self):
-        from .frames.management import ResetCommand
+        from .frames.f_commands import ResetCommand
 
         await self.send_command(ResetCommand())
 
