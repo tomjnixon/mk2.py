@@ -80,7 +80,7 @@ class VEBusConnection:
 
     @contextmanager
     def with_reply_cb(self, reply_cb):
-        """register reply_cb to recieve replies inside a context manager"""
+        """register reply_cb to receive replies inside a context manager"""
         self.reply_callbacks.append(reply_cb)
 
         yield
