@@ -169,11 +169,11 @@ class VEBusSession:
         return info.from_raw_value(raw)
 
     async def write_setting_unscaled(
-        self, setting: Setting, value: int, write_ram_only=False
+        self, setting: Setting, raw_value: int, write_ram_only=False
     ):
         async with self.connection_lock:
             await self.connection.write_setting_unscaled(
-                setting, value, write_ram_only=write_ram_only
+                setting, raw_value, write_ram_only=write_ram_only
             )
 
     async def write_setting(self, setting: Setting, value: float, write_ram_only=False):
