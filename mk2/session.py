@@ -105,7 +105,7 @@ class VEBusSession:
         async with self.connection_lock:
             await self.connection.write_ram_var_unscaled(ram_var, raw_value)
 
-    async def write_ram_var(self, ram_var: AnyRAMVar, value: float):
+    async def write_ram_var(self, ram_var: AnyRAMVar, value: float | int | bool):
         async with self.connection_lock:
             info = await self._get_ram_var_info_with_lock(ram_var)
             scaled = info.to_raw_value(value)
