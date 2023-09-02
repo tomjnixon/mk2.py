@@ -30,7 +30,7 @@ class VEBusSession:
 
         self.ram_var_info: dict[AnyRAMVar, Optional[RAMVarInfo]] = {}
 
-        self.setting_info: dict[Setting, SettingInfo] = {}
+        self.setting_info: dict[Setting, Optional[SettingInfo]] = {}
 
     async def _task(self):
         from .frames.switch import (
@@ -149,7 +149,7 @@ class VEBusSession:
                 mains_period=await scale(RAMVar.MAINS_PERIOD, unscaled.mains_period),
             )
 
-    async def get_setting_info(self, setting: Setting):
+    async def get_setting_info(self, setting: Setting) -> Optional[SettingInfo]:
         if setting not in self.setting_info:
             async with self.connection_lock:
                 info = await self.connection.get_setting_info(setting)
@@ -163,6 +163,8 @@ class VEBusSession:
 
     async def read_setting(self, setting: Setting):
         info = await self.get_setting_info(setting)
+        if info is None:
+            raise ValueError("trying to access unsupported setting")
         raw = await self.read_setting_unscaled(setting)
         return info.from_raw_value(raw)
 
@@ -176,6 +178,8 @@ class VEBusSession:
 
     async def write_setting(self, setting: Setting, value: int, write_ram_only=False):
         info = await self.get_setting_info(setting)
+        if info is None:
+            raise ValueError("trying to access unsupported setting")
         raw = info.to_raw_value(value)
         await self.write_setting_unscaled(setting, raw, write_ram_only=write_ram_only)
 

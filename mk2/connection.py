@@ -7,7 +7,7 @@ from .frames.f_commands import FCommandType
 from .frames.types import Command, Reply, ReplyParser
 from .framing import RawFrame, Unpacker, format_frame
 from .ram_var import AnyRAMVar, FloatRAMVarInfo, RAMVar
-from .setting import Setting, SettingFlags
+from .setting import Setting, SettingFlags, SettingInfo
 
 
 class VEBusConnection:
@@ -196,7 +196,7 @@ class VEBusConnection:
             case _:
                 assert False
 
-    async def get_setting_info(self, setting: Setting):
+    async def get_setting_info(self, setting: Setting) -> Optional[SettingInfo]:
         from .frames.w_commands import GetSettingInfoCommand, GetSettingInfoReply
 
         await self.send_command(GetSettingInfoCommand(setting))
