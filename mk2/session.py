@@ -183,7 +183,7 @@ class VEBusSession:
         raw = info.to_raw_value(value)
         await self.write_setting_unscaled(setting, raw, write_ram_only=write_ram_only)
 
-    async def read_setting_flags(self):
+    async def read_setting_flags(self) -> SettingFlags:
         async with self.connection_lock:
             return await self.connection.read_setting_flags()
 
