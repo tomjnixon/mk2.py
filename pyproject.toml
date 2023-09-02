@@ -9,6 +9,7 @@ description = "Unofficial Victron MK2/VE.Bus client"
 requires-python = ">=3.11"
 dependencies = [
     "pyserial~=3.5",
+    "pyserial-asyncio~=0.6",
 ]
 
 [project.optional-dependencies]
