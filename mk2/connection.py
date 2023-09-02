@@ -45,8 +45,9 @@ class VEBusConnection:
     @asynccontextmanager
     async def run(self):
         async with asyncio.TaskGroup() as tg:
-            tg.create_task(self._read_task())
+            task = tg.create_task(self._read_task())
             yield
+            task.cancel()
 
     async def _read_task(self):
         while True:
