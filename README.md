@@ -60,10 +60,83 @@ The components are as follows:
 
 Examples can be found in [mk2/examples](mk2/examples).
 
+### Monitor
+
 A simple monitor can be ran with:
 
 ```sh
 python -m mk2.examples.monitor -t /dev/ttyUSB0
+```
+### Write
+
+A tool for writing RAM vars, settings and flags:
+
+```
+python -m mk2.examples.write --help
+usage: write.py [-h] --tty TTY [--list] [--log-level LOG_LEVEL] [--write-ram-var ram_var value]
+                [--write-setting setting value] [--write-setting-ram-only setting value] [--set-flag flag]
+                [--clear-flag flag] [--set-flag-ram-only flag] [--clear-flag-ram-only flag]
+
+write to RAM vars, settings and flags
+
+options:
+  -h, --help            show this help message and exit
+  --tty TTY, -t TTY     serial port to use
+  --list                list all RAM vars, settings and flags with their values and other information
+  --log-level LOG_LEVEL, -l LOG_LEVEL
+  --write-ram-var ram_var value
+                        write a RAM var with a given name and value (either a number or true/false)
+  --write-setting setting value
+                        write a setting with a given name and value (a number)
+  --write-setting-ram-only setting value
+                        write a setting to RAM with a given name and value (a number). settings written with
+                        this will take effect, but will not appear when read (e.g. with --list), and are not
+                        saved
+  --set-flag flag       set/enable a flag with a given name
+  --clear-flag flag     clear/disable a flag with a given name
+  --set-flag-ram-only flag
+                        set/enable a flag in RAM only with a given name (see --write-setting-ram-only)
+  --clear-flag-ram-only flag
+                        clear/disable a flag in RAM only with a given name (see --write-setting-ram-only)
+
+```
+
+Use `--list` to show available RAM vars, settings and flags (output truncated):
+
+```
+python -m mk2.examples.write -t /dev/ttyUSB0 --list
+RAM vars:
+    CHARGE_STATE: unsigned value=0.49 scale=0.005 offset=0
+    ...
+settings (note that RAM-only changes will not be reflected here):
+    VS_USAGE: value=3 default=1 min=0 max=6 scale=1 offset=0
+    ...
+flags:
+    DISABLE_CHARGE: value=False
+    ...
+```
+
+For example, I use the 'dedicated ignore AC input' virtual switch setting
+(which must be configured using the official tools first!) to store energy
+without using ESS mode, and can put this into different modes with these
+commands:
+
+Prefer to run from battery:
+
+```sh
+python -m mk2.examples.write -t /dev/ttyUSB0 --write-setting-ram-only VS_USAGE 3 --set-flag-ram-only DISABLE_CHARGE
+```
+
+Prefer to run from AC:
+
+```sh
+python -m mk2.examples.write -t /dev/ttyUSB0 --write-setting-ram-only VS_USAGE 0 --set-flag-ram-only DISABLE_CHARGE
+```
+
+Charge:
+
+```sh
+python -m mk2.examples.write -t /dev/ttyUSB0 --write-setting-ram-only VS_USAGE 0 --clear-flag-ram-only DISABLE_CHARGE
 ```
 
 ## Install
