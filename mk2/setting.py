@@ -50,7 +50,7 @@ class SettingInfo:
     def from_raw_value(self, raw_value: int) -> float:
         return self.scale * (raw_value + self.offset)
 
-    def to_raw_value(self, value: float) -> int:
+    def to_raw_value(self, value: float | int) -> int:
         raw_value = int(round((value / self.scale) - self.offset))
         # rounding means this should never happen if the scaled value is in range
         assert self.minimum <= raw_value <= self.maximum

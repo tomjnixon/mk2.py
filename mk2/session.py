@@ -176,7 +176,9 @@ class VEBusSession:
                 setting, raw_value, write_ram_only=write_ram_only
             )
 
-    async def write_setting(self, setting: Setting, value: float, write_ram_only=False):
+    async def write_setting(
+        self, setting: Setting, value: float | int, write_ram_only=False
+    ):
         info = await self.get_setting_info(setting)
         if info is None:
             raise ValueError("trying to access unsupported setting")
