@@ -115,7 +115,7 @@ class VEBusSession:
         info = await self._get_ram_var_info_with_lock(var)
         return info.from_raw_value(raw_value)
 
-    async def get_dc_info(self):
+    async def get_dc_info(self) -> DCInfo:
         async with self.connection_lock:
             unscaled = await self.connection.get_dc_info_unscaled()
 
@@ -129,7 +129,7 @@ class VEBusSession:
                 ),
             )
 
-    async def get_ac_info(self, command: FCommandType = FCommandType.L1_INFO):
+    async def get_ac_info(self, command: FCommandType = FCommandType.L1_INFO) -> ACInfo:
         async with self.connection_lock:
             unscaled = await self.connection.get_ac_info_unscaled(command=command)
 
