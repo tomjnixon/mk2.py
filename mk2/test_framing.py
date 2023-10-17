@@ -21,7 +21,7 @@ def get_odd_messages():
     06 21 FF FF FF FF 83 4A
     07 21 00 00 00 00 01 00 C5
     """
-    return [bytes.fromhex(l) for l in messages.strip().split("\n")]
+    return [bytes.fromhex(line) for line in messages.strip().split("\n")]
 
 
 @pytest.mark.parametrize("message", get_odd_messages())
