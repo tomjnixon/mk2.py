@@ -5,7 +5,16 @@ from typing import Optional
 
 
 def calc_checksum(message_without_checksum: bytes):
-    return (256 - (sum(message_without_checksum) & 0xFF)) & 0xFF
+    if message_without_checksum[1] in (0x21, 0x3F, 0x38, 0x3D):
+        # we don't use frames like this, but it's useful to be able to parse
+        # them for monitoring/re.
+        s = sum(message_without_checksum) + sum(
+            message_without_checksum[i] >> 4 | message_without_checksum[i] << 4
+            for i in range(1, min(7, len(message_without_checksum)), 2)
+        )
+        return -s & 0xFF
+    else:
+        return -sum(message_without_checksum) & 0xFF
 
 
 class RawFrame:
