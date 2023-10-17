@@ -128,6 +128,7 @@ def test_unpacker():
         MK2Frame(b"A", bytes([0x01, 0x00])),
         MK2Frame(b"B", bytes([0x03, 0x02])),
         VEBusFrame(0x20, bytes([0x05, 0x04])),
+        VEBusFrame(0x21, bytes([0xFF, 0xFF, 0xFF, 0xFF, 0x80])),
     ]
     messags_bytes = b"".join(map(format_frame, frames))
 
