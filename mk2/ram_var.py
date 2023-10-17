@@ -34,6 +34,9 @@ class RAMVar(Enum):
     INPUT_POWER_UNFILTERED = 18
     OUTPUT_POWER_UNFILTERED = 19
 
+    # undocumented, not sure what unit
+    BAT_TEMPERATURE = 21
+
 
 @dataclass(frozen=True, eq=True)
 class OtherRAMVar:
