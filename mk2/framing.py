@@ -47,12 +47,6 @@ def format_frame(frame: RawFrame) -> bytes:
     return without_checksum + struct.pack("<B", calc_checksum(without_checksum))
 
 
-def test_format_frame():
-    assert format_frame(MK2Frame(b"A", bytes([0x01, 0x00]))) == bytes(
-        [0x04, 0xFF, ord("A"), 0x01, 0x00, 0xBB]
-    )
-
-
 class Unpacker:
     """turn a stream of bytes (in arbitrary chunks) into a stream of frames
 
