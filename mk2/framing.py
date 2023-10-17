@@ -57,7 +57,7 @@ class Unpacker:
     def __init__(
         self,
         on_frame,
-        frame_types=(0xFF, 0x20, 0x21, 0x41, 0x3C),
+        frame_types=(0xFF, 0x20, 0x21, 0x41, 0x3C, 0x3F),
         logger: Optional[logging.Logger] = None,
     ):
         self.buffer = bytearray()
