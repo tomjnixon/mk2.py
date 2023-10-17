@@ -1,5 +1,5 @@
-from .framing import MK2Frame, VEBusFrame, format_frame
 import pytest
+from .framing import MK2Frame, RawFrame, Unpacker, VEBusFrame, format_frame
 
 
 def test_format_frame():
@@ -27,3 +27,21 @@ def get_odd_messages():
 @pytest.mark.parametrize("message", get_odd_messages())
 def test_format_odd_frame(message):
     assert format_frame(VEBusFrame(message[1], message[2:-1])) == message
+
+
+def test_unpacker():
+    frames = [
+        MK2Frame(b"A", bytes([0x01, 0x00])),
+        MK2Frame(b"B", bytes([0x03, 0x02])),
+        VEBusFrame(0x20, bytes([0x05, 0x04])),
+        VEBusFrame(0x21, bytes([0xFF, 0xFF, 0xFF, 0xFF, 0x80])),
+    ]
+    messags_bytes = b"".join(map(format_frame, frames))
+
+    unpacked: list[RawFrame] = []
+    unpacker = Unpacker(unpacked.append)
+
+    for b in messags_bytes:
+        unpacker.on_recv(bytes([b]))
+
+    assert unpacked == frames

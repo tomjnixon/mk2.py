@@ -121,21 +121,3 @@ class Unpacker:
 
         self.logger.warning("dropped bytes: %s", self.buffer[: pos - 1].hex(" "))
         self.buffer = self.buffer[pos - 1 :]
-
-
-def test_unpacker():
-    frames = [
-        MK2Frame(b"A", bytes([0x01, 0x00])),
-        MK2Frame(b"B", bytes([0x03, 0x02])),
-        VEBusFrame(0x20, bytes([0x05, 0x04])),
-        VEBusFrame(0x21, bytes([0xFF, 0xFF, 0xFF, 0xFF, 0x80])),
-    ]
-    messags_bytes = b"".join(map(format_frame, frames))
-
-    unpacked: list[RawFrame] = []
-    unpacker = Unpacker(unpacked.append)
-
-    for b in messags_bytes:
-        unpacker.on_recv(bytes([b]))
-
-    assert unpacked == frames
