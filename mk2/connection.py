@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager, contextmanager
 from dataclasses import replace
 from typing import Callable, Optional
 from .frames.f_commands import FCommandType
+from .frames.led import LEDStates
 from .frames.types import Command, Reply, ReplyParser
 from .framing import RawFrame, Unpacker, format_frame
 from .ram_var import AnyRAMVar, FloatRAMVarInfo, RAMVar
@@ -265,3 +266,15 @@ class VEBusConnection:
         await self.write_setting_unscaled(
             Setting.FLAGS1, flags1, write_ram_only=write_ram_only
         )
+
+    async def get_led_status(self) -> LEDStates:
+        from .frames.led import LEDStatusCommand, LEDStatusReply
+
+        await self.send_command(LEDStatusCommand())
+
+        reply = await self.wait_for_reply(lambda r: isinstance(r, LEDStatusReply))
+        assert isinstance(reply, LEDStatusReply)
+
+        if reply.states is None:
+            raise RuntimeError("unable to determine LED status")
+        return reply.states

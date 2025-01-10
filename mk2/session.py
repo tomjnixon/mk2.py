@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from typing import Optional
 from .connection import VEBusConnection
 from .frames.f_commands import ACInfo, DCInfo, FCommandType
+from .frames.led import LEDStates
 from .ram_var import AnyRAMVar, RAMVar, RAMVarInfo
 from .setting import Setting, SettingFlags, SettingInfo
 
@@ -194,3 +195,7 @@ class VEBusSession:
             return await self.connection.write_setting_flags(
                 flags, write_ram_only=write_ram_only
             )
+
+    async def get_led_status(self) -> LEDStates:
+        async with self.connection_lock:
+            return await self.connection.get_led_status()

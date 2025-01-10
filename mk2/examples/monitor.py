@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import serial_asyncio
-from mk2 import AnyRAMVar, RAMVar, VEBusConnection, VEBusSession
+from mk2 import AnyRAMVar, LEDState, RAMVar, VEBusConnection, VEBusSession
 
 
 def parse_args():
@@ -44,6 +44,11 @@ async def main(args):
 
             line = " ".join(fmt_var(var, value) for var, value in zip(ram_vars, values))
             print(line)  # noqa
+
+            led_status = await session.get_led_status()
+            for led, state in led_status.states.items():
+                if state is not LEDState.OFF:
+                    print(f"{led.name.lower()}: {state.name.lower()}")  # noqa
 
             await asyncio.sleep(5)
 
