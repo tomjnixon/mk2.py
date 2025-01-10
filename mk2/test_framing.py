@@ -1,5 +1,13 @@
+import struct
 import pytest
-from .framing import MK2Frame, RawFrame, Unpacker, VEBusFrame, format_frame
+from .framing import (
+    MK2Frame,
+    RawFrame,
+    Unpacker,
+    VEBusFrame,
+    calc_checksum,
+    format_frame,
+)
 
 
 def test_format_frame():
@@ -29,6 +37,15 @@ def test_format_odd_frame(message):
     assert format_frame(VEBusFrame(message[1], message[2:-1])) == message
 
 
+def format_frame_with_led(frame: RawFrame, led_frame: MK2Frame) -> bytes:
+    """format a frame with appended LED data"""
+    data = frame.as_bytes()
+    led_data = led_frame.data
+    len_byte = 0x80 | (len(data) + len(led_data))
+    without_checksum = bytes([len_byte]) + data + led_data
+    return without_checksum + struct.pack("<B", calc_checksum(without_checksum))
+
+
 def test_unpacker():
     frames = [
         MK2Frame(b"A", bytes([0x01, 0x00])),
@@ -37,6 +54,12 @@ def test_unpacker():
         VEBusFrame(0x21, bytes([0xFF, 0xFF, 0xFF, 0xFF, 0x80])),
     ]
     messags_bytes = b"".join(map(format_frame, frames))
+
+    # add a frame with extra LED state appended
+    with_led_frame = MK2Frame(b"C", bytes([0x05, 0x04]))
+    led_frame = MK2Frame(b"L", bytes([0x7, 0x06]))
+    frames += [with_led_frame, led_frame]
+    messags_bytes += format_frame_with_led(with_led_frame, led_frame)
 
     unpacked: list[RawFrame] = []
     unpacker = Unpacker(unpacked.append)

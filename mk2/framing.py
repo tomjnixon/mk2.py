@@ -87,6 +87,10 @@ class Unpacker:
                 continue
 
             length = self.buffer[0]
+
+            has_led_state = bool(length & 0x80)
+            length = length & 0x7F
+
             if length < 2:
                 self.to_next_sync()
                 continue
@@ -101,12 +105,18 @@ class Unpacker:
                 continue
 
             data = bytes(self.buffer[2 : length + 1])
+            if has_led_state:
+                data, led_data = data[:-2], data[-2:]
+
             frame: RawFrame
             if frame_type == 0xFF:
                 frame = MK2Frame(bytes([data[0]]), bytes(data[1:]))
             else:
                 frame = VEBusFrame(frame_type, bytes(data))
             self.on_frame(frame)
+
+            if has_led_state:
+                self.on_frame(MK2Frame(b"L", led_data))
 
             self.buffer = self.buffer[length + 2 :]
             continue
