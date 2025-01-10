@@ -1,3 +1,5 @@
 __pycache__
 *.pyc
 result
+build
+*.egg-info
