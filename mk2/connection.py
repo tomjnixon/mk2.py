@@ -104,7 +104,7 @@ class VEBusConnection:
         f: asyncio.Future[Reply] = asyncio.Future()
 
         def reply_cb(reply):
-            if match_reply(reply):
+            if match_reply(reply) and not f.done():
                 f.set_result(reply)
 
         with self.with_reply_cb(reply_cb):
