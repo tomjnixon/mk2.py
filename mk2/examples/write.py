@@ -32,7 +32,7 @@ def parse_ram_var_value(value: str) -> bool | float:
     if value.lower() == "true":
         return True
     elif value.lower() == "false":
-        return True
+        return False
     else:
         return float(value)
 
